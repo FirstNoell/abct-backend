@@ -2,85 +2,82 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import smtplib
 from email.mime.text import MIMEText
+import os
 
 app = Flask(__name__)
-CORS(app)
+CORS(app)  # allow requests from your frontend (fixes CORS)
 
-# =========================
-# 📩 EMAIL FUNCTION
-# =========================
+# ===== CONFIG (via Render Environment Variables) =====
+EMAIL_USER = os.getenv("coronadonoell@gmail.com")            # your gmail
+EMAIL_PASS = os.getenv("vtomdwobxeysvebn")            # app password (16 chars, no spaces)
+OWNER_EMAIL = os.getenv("charlie0315coronado") or EMAIL_USER
+DEV_EMAIL = os.getenv("coronadonoell") or EMAIL_USER
+
+# ===== EMAIL SENDER =====
 def send_email(data):
-    sender = "coronadonoell@gmail.com"
-    password = ": vtomdwobxeysvebn"
+    try:
+        body = f"""
+New Booking Received:
 
-    recipients = [
-        "charlie0315coronado@email.com",
-        "nsmrwkltqlkossbv@gmail.com"
-    ]
-
-    message = f"""
-🔥 NEW BOOKING ALERT
-
-Customer Name: {data.get('name')}
+Name: {data.get('name')}
 Email: {data.get('email')}
 Phone: {data.get('phone')}
-
-📅 Date: {data.get('date')}
-⏰ Time: {data.get('time')}
-👥 Guests: {data.get('guests')}
-🍽 Booking Type: {data.get('booking_type')}
+Booking Type: {data.get('booking_type')}
+Date: {data.get('date')}
+Time: {data.get('time')}
+Guests: {data.get('guests')}
+Address: {data.get('address')}
+Details: {data.get('order_details')}
 """
 
-    msg = MIMEText(message)
-    msg["Subject"] = "📌 New Booking - ABCT"
-    msg["From"] = sender
-    msg["To"] = ", ".join(recipients)
+        msg = MIMEText(body)
+        msg['Subject'] = '📩 New Booking - ABCT'
+        msg['From'] = EMAIL_USER
+        # send to both owner and dev
+        msg['To'] = f"{OWNER_EMAIL}, {DEV_EMAIL}"
 
-    # 🔥 TRY EMAIL (MAY FAIL SA RENDER)
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-        server.login(sender, password)
-        server.sendmail(sender, recipients, msg.as_string())
+        # allow replying directly to the customer's email
+        if data.get('email'):
+            msg['Reply-To'] = data.get('email')
+
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            server.login(EMAIL_USER, EMAIL_PASS)
+            server.send_message(msg)
+
+        print("✅ Email sent")
+
+    except Exception as e:
+        print("❌ Email error:", str(e))
+        raise
 
 
-# =========================
-# 🏠 HEALTH CHECK
-# =========================
-@app.route("/", methods=["GET"])
+# ===== ROUTES =====
+@app.route("/")
 def home():
-    return "✅ ABCT Backend is running!"
+    return "ABCT Backend Running ✅"
 
 
-# =========================
-# 📥 WEBHOOK (SAFE VERSION)
-# =========================
 @app.route("/webhook", methods=["POST"])
 def webhook():
     try:
-        data = request.form.to_dict()
-        print("📥 Booking received:", data)
+        data = request.form
+        print("📥 Received booking:", data)
 
-        # 🔥 SAFE EMAIL (HINDI MAG CRASH)
-        try:
-            send_email(data)
-            print("✅ Email sent")
-        except Exception as email_error:
-            print("❌ Email failed:", str(email_error))
+        send_email(data)
 
         return jsonify({
             "status": "success",
-            "message": "Booking received!"
+            "message": "Booking received"
         })
 
     except Exception as e:
-        print("❌ ERROR:", str(e))
+        print("❌ Webhook error:", str(e))
         return jsonify({
             "status": "error",
             "message": str(e)
         }), 500
 
 
-# =========================
-# 🚀 RUN
-# =========================
+# ===== RUN (for local only) =====
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    app.run(debug=True)
