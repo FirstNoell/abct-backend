@@ -11,7 +11,7 @@ CORS(app)
 # =========================
 def send_email(data):
     sender = "coronadonoell@gmail.com"
-    password = ": nsmrwkltqlkossbv"
+    password = ": vtomdwobxeysvebn"
 
     recipients = [
         "charlie0315coronado@email.com",
