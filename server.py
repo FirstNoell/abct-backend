@@ -10,13 +10,10 @@ app = Flask(__name__)
 CORS(app)
 
 # ==============================
-# EMAIL CONFIG
+# EMAIL CONFIG (SECURE)
 # ==============================
-# IMPORTANT:
-# Do NOT hardcode your real app password here.
-# Set these in environment variables instead.
-EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS", "coronadonoell@gmail.com")
-EMAIL_PASSWORD = os.getenv("xtfetxkbwiupsdad", "")
+EMAIL_ADDRESS = os.getenv("coronadonoell@gmail.com")
+EMAIL_PASSWORD = os.getenv("nsmrwkltqlkossbv")
 
 # ==============================
 # HELPERS
@@ -91,10 +88,7 @@ def build_email_body(data):
     if booking_type == "dine_in":
         guests = clean_value(data.get("guests"))
         if guests:
-            lines.extend([
-                "",
-                f"👥 Guests: {guests}",
-            ])
+            lines.extend(["", f"👥 Guests: {guests}"])
 
     elif booking_type == "delivery":
         address = clean_value(data.get("address"))
@@ -121,7 +115,6 @@ def build_email_body(data):
     return "\n".join(lines)
 
 def send_email(data):
-    # Skip safely if email config is missing
     if not EMAIL_ADDRESS or not EMAIL_PASSWORD:
         print("⚠️ Email skipped: missing EMAIL_ADDRESS or EMAIL_PASSWORD")
         return
@@ -154,7 +147,8 @@ def webhook():
     if request.method == "GET":
         return "🚀 Webhook is running successfully!"
 
-    data = request.get_json(silent=True) or {}
+    # 🔥 FIXED: FormData support
+    data = request.form.to_dict()
 
     print("📥 Received booking:", data)
 
@@ -168,4 +162,4 @@ def webhook():
 # ==============================
 if __name__ == "__main__":
     print("🚀 Starting ABCT Webhook Server...")
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000)
