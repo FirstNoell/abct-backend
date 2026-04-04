@@ -17,6 +17,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const formData = new FormData(form);
 
         try {
+            console.log("👉 Sending request...");
+
             const response = await fetch("https://abct-backend.onrender.com/webhook", {
                 method: "POST",
                 body: formData
@@ -35,7 +37,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
         } catch (error) {
-            console.error("❌ ERROR:", error);
+            console.error("❌ FETCH ERROR:", error);
             alert("❌ Error connecting to server");
         }
     });
