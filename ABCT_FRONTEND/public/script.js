@@ -1,16 +1,18 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-    console.log("JS LOADED");
+    console.log("🔥 JS LOADED");
 
     const form = document.getElementById("bookingForm");
 
     if (!form) {
-        console.error("❌ bookingForm not found");
+        console.error("❌ bookingForm NOT FOUND");
         return;
     }
 
     form.addEventListener("submit", async function(e) {
         e.preventDefault();
+
+        console.log("🚀 Form submitted");
 
         const formData = new FormData(form);
 
@@ -20,10 +22,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 body: formData
             });
 
-            console.log("Response status:", response.status);
+            console.log("📡 Response status:", response.status);
 
             const result = await response.json();
-            console.log("Result:", result);
+            console.log("📦 Result:", result);
 
             if (result.status === "success") {
                 alert("✅ Booking submitted successfully!");
@@ -33,7 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
         } catch (error) {
-            console.error("Error:", error);
+            console.error("❌ ERROR:", error);
             alert("❌ Error connecting to server");
         }
     });
