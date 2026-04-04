@@ -15,8 +15,9 @@ DEV_EMAIL = os.getenv("DEV_EMAIL")
 STAFF_EMAIL = os.getenv("STAFF_EMAIL")
 RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 
+
 # =========================
-# 📩 EMAIL FUNCTION (SAFE VERSION)
+# 📩 EMAIL FUNCTION (SAFE + TIMEOUT)
 # =========================
 def send_email(data):
     try:
@@ -53,13 +54,14 @@ def send_email(data):
                     <p><b>Address:</b> {data.get('address')}</p>
                     <p><b>Order Details:</b> {data.get('order_details')}</p>
                 """
-            }
+            },
+            timeout=10  # 🔥 prevents hanging
         )
 
         print("📡 Email API status:", response.status_code)
         print("📡 Response:", response.text)
 
-        return response.status_code == 200 or response.status_code == 202
+        return response.status_code in [200, 202]
 
     except Exception as e:
         print("❌ Email error:", str(e))
@@ -80,25 +82,37 @@ def webhook():
         data = request.form.to_dict()
         print("📥 Received booking:", data)
 
-        # 👉 SEND EMAIL (SAFE)
-        email_sent = send_email(data)
+        # =========================
+        # 🔥 SAFE EMAIL (NEVER BREAK SYSTEM)
+        # =========================
+        try:
+            email_sent = send_email(data)
+        except Exception as e:
+            print("⚠️ Email failed but continuing:", str(e))
+            email_sent = False
 
-        # 👉 SAVE TO CSV (ALWAYS SAVE kahit fail email)
+        # =========================
+        # 💾 SAVE TO CSV (ALWAYS WORKS)
+        # =========================
         file_exists = os.path.isfile("bookings.csv")
+
         with open("bookings.csv", "a", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=data.keys())
+
             if not file_exists:
                 writer.writeheader()
+
             writer.writerow(data)
 
         return jsonify({
             "status": "success",
             "email_sent": email_sent,
-            "message": "Booking saved"
+            "message": "Booking saved successfully"
         })
 
     except Exception as e:
         print("❌ Webhook error:", str(e))
+
         return jsonify({
             "status": "error",
             "message": str(e)
@@ -106,7 +120,7 @@ def webhook():
 
 
 # =========================
-# 🚀 RUN LOCAL / RENDER
+# 🚀 RUN (RENDER / LOCAL)
 # =========================
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
