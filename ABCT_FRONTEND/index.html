@@ -2,30 +2,90 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ABCT Booking</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABCT | Japanese Restaurant</title>
+
+    <link rel="icon" href="logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-    <h2>Booking Form</h2>
+<header>
+    <nav>
+        <div class="logo">
+            <img src="ABC_NOBACK_2026-04-03_112714-removebg-preview.png" alt="ABCT Logo">
+        </div>
 
+        <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#booking">Booking</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+</header>
+
+<!-- HOME -->
+<section id="home">
+    <div class="overlay">
+        <h1>ABCT Japanese Restaurant</h1>
+        <p>Experience authentic Japanese dining</p>
+        <a href="#booking" class="btn">Reserve Now</a>
+    </div>
+</section>
+
+<!-- BOOKING -->
+<section id="booking">
+    <h2>Book a Table</h2>
+
+    <!-- ✅ UPDATED FORM (CONNECTED SA BACKEND) -->
     <form id="bookingForm">
 
-        <input type="text" name="name" placeholder="Name" required><br><br>
+        <input type="text" name="name" placeholder="Full Name" required>
 
-        <input type="email" name="email" placeholder="Email" required><br><br>
+        <input type="email" name="email" placeholder="Email Address" required>
 
-        <input type="text" name="phone" placeholder="Phone" required><br><br>
+        <input type="tel" name="phone" placeholder="Phone Number" required>
 
-        <input type="date" name="date" required><br><br>
+        <select name="booking_type" required>
+            <option value="">Select Booking Type</option>
+            <option value="dine_in">Dine-In Reservation</option>
+            <option value="delivery">Delivery Order</option>
+            <option value="event">Event Reservation</option>
+        </select>
 
-        <input type="time" name="time" required><br><br>
+        <input type="date" name="date" required>
+        <input type="time" name="time" required>
 
-        <button type="submit">Submit</button>
+        <input type="number" name="guests" placeholder="Number of Guests" min="1" max="300" required>
+
+        <button type="submit" id="submitBtn">Book Now</button>
 
     </form>
+</section>
 
-    <!-- ✅ IMPORTANT: SCRIPT SA BABA -->
-    <script src="script.js"></script>
+<!-- CONTACT -->
+<section id="contact">
+    <h2>Contact</h2>
+    <p>Email: charlie0315coronado@gmail.com</p>
+    <p>Phone: +63 912 345 6789</p>
+</section>
+
+<footer>
+    <p>© 2026 ABCT Restaurant</p>
+</footer>
+
+<script>
+function toggleMenu() {
+    document.getElementById("navLinks").classList.toggle("active");
+}
+</script>
+
+<!-- ✅ IMPORTANT: CONNECT JS -->
+<script src="script.js"></script>
 
 </body>
 </html>

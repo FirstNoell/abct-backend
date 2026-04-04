@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("🔥 JS LOADED");
 
     const form = document.getElementById("bookingForm");
+    const btn = document.getElementById("submitBtn");
 
     if (!form) {
         console.error("❌ bookingForm NOT FOUND");
@@ -17,6 +18,10 @@ document.addEventListener("DOMContentLoaded", function () {
         const formData = new FormData(form);
 
         try {
+            // 🔥 UX improvement (loading state)
+            btn.disabled = true;
+            btn.innerText = "Processing...";
+
             console.log("👉 Sending request...");
 
             const response = await fetch("https://abct-backend.onrender.com/webhook", {
@@ -39,6 +44,10 @@ document.addEventListener("DOMContentLoaded", function () {
         } catch (error) {
             console.error("❌ FETCH ERROR:", error);
             alert("❌ Error connecting to server");
+        } finally {
+            // 🔥 Reset button state
+            btn.disabled = false;
+            btn.innerText = "Book Now";
         }
     });
 

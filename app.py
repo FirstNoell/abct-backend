@@ -1,23 +1,73 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import smtplib
+from email.mime.text import MIMEText
 
 app = Flask(__name__)
-CORS(app)  # 🔥 Enable CORS (VERY IMPORTANT)
+CORS(app)  # 🔥 allow frontend (Vercel) to connect
 
-# ✅ Health check (optional but useful)
+
+# =========================
+# 📩 EMAIL FUNCTION
+# =========================
+def send_email(data):
+    sender = "coronadonoell@gmail.com"
+    password = ": nsmrwkltqlkossbv"
+
+    # 🔥 TEAM EMAILS (OWNER + STAFF + YOU)
+    recipients = [
+        "charlie0315coronado@email.com",
+        # "staff@email.com",
+        "coronadonoell@gmail.com"
+    ]
+
+    message = f"""
+🔥 NEW BOOKING ALERT
+
+Customer Name: {data.get('name')}
+Email: {data.get('email')}
+Phone: {data.get('phone')}
+
+📅 Date: {data.get('date')}
+⏰ Time: {data.get('time')}
+👥 Guests: {data.get('guests')}
+🍽 Booking Type: {data.get('booking_type')}
+
+------------------------
+⚠ ACTION REQUIRED:
+Please contact the customer to confirm the booking.
+"""
+
+    msg = MIMEText(message)
+    msg["Subject"] = "📌 New Booking - ABCT"
+    msg["From"] = sender
+    msg["To"] = ", ".join(recipients)
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(sender, password)
+        server.sendmail(sender, recipients, msg.as_string())
+
+
+# =========================
+# 🏠 HEALTH CHECK
+# =========================
 @app.route("/", methods=["GET"])
 def home():
-    return "ABCT Backend is running!"
+    return "✅ ABCT Backend is running!"
 
-# ✅ Webhook endpoint (for your form)
+
+# =========================
+# 📥 WEBHOOK (FORM RECEIVER)
+# =========================
 @app.route("/webhook", methods=["POST"])
 def webhook():
     try:
         data = request.form.to_dict()
 
-        print("📥 Received booking:", data)
+        print("📥 Booking received:", data)
 
-        # 👉 pwede mo lagyan ng logic dito (email, save, etc.)
+        # 🔥 SEND EMAIL TO TEAM
+        send_email(data)
 
         return jsonify({
             "status": "success",
@@ -33,5 +83,8 @@ def webhook():
         }), 500
 
 
+# =========================
+# 🚀 RUN SERVER
+# =========================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
