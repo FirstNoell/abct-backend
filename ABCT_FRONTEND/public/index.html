@@ -1,20 +1,29 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>ABCT Booking</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-<h1>Booking Form</h1>
-
 <form id="bookingForm">
-    <input type="text" name="name" placeholder="Name" required><br>
-    <input type="email" name="email" placeholder="Email" required><br>
-    <button type="submit">Submit</button>
+
+  <input type="text" name="name" placeholder="Name" required><br><br>
+
+  <input type="email" name="email" placeholder="Email" required><br><br>
+
+  <input type="text" name="phone" placeholder="Phone"><br><br>
+
+  <select name="booking_type">
+    <option value="event">Event</option>
+    <option value="reservation">Reservation</option>
+  </select><br><br>
+
+  <select name="payment_method">
+    <option value="card">Card</option>
+    <option value="cash">Cash</option>
+  </select><br><br>
+
+  <input type="date" name="date"><br><br>
+
+  <input type="time" name="time"><br><br>
+
+  <input type="text" name="event_type" placeholder="Event Type"><br><br>
+
+  <input type="number" name="event_guests" placeholder="Number of Guests"><br><br>
+
+  <button type="submit">Submit Booking</button>
+
 </form>
-
-<script src="script.js"></script>
-
-</body>
-</html>
