@@ -3,35 +3,70 @@ from flask_cors import CORS
 import os
 import requests
 import csv
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
 
-# =========================
-# ✅ ENV VARIABLES
-# =========================
-EMAIL_USER = os.getenv("EMAIL_USER")
-DEV_EMAIL = os.getenv("DEV_EMAIL")
-STAFF_EMAIL = os.getenv("STAFF_EMAIL")
-RESEND_API_KEY = os.getenv("RESEND_API_KEY")
+# 🔐 ENV VARIABLES
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
 
+@app.route("/")
+def home():
+    return "ABCT Backend Running 🚀"
 
-# =========================
-# 📩 EMAIL FUNCTION (SAFE + TIMEOUT)
-# =========================
-def send_email(data):
+@app.route("/webhook", methods=["POST"])
+def webhook():
     try:
+        data = request.form
+
+        # 📥 Extract form data
+        name = data.get("name")
+        email = data.get("email")
+        phone = data.get("phone")
+        booking_type = data.get("booking_type")
+        date = data.get("date")
+        time_ = data.get("time")
+        guests = data.get("guests")
+
+        print("📥 Received booking:", data)
+
+        # 📝 Save to CSV
+        with open("bookings.csv", "a", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow([
+                datetime.now(),
+                name,
+                email,
+                phone,
+                booking_type,
+                date,
+                time_,
+                guests
+            ])
+
+        # ❌ If no API key
         if not RESEND_API_KEY:
             print("❌ Missing RESEND_API_KEY")
-            return False
+            return jsonify({"status": "error", "message": "Missing API key"}), 500
 
-        to_emails = [EMAIL_USER, DEV_EMAIL, STAFF_EMAIL]
-        to_emails = [email for email in to_emails if email]
+        # 🔥 DEMO MODE → FORCE EMAIL TO YOU
+        to_emails = ["coronadonoell@gmail.com"]
 
-        if not to_emails:
-            print("❌ No recipient emails configured")
-            return False
+        # 📧 Email content
+        subject = "📅 New Booking Received"
+        html_content = f"""
+        <h2>New Booking</h2>
+        <p><strong>Name:</strong> {name}</p>
+        <p><strong>Email:</strong> {email}</p>
+        <p><strong>Phone:</strong> {phone}</p>
+        <p><strong>Type:</strong> {booking_type}</p>
+        <p><strong>Date:</strong> {date}</p>
+        <p><strong>Time:</strong> {time_}</p>
+        <p><strong>Guests:</strong> {guests}</p>
+        """
 
+        # 📡 Send email via Resend
         response = requests.post(
             "https://api.resend.com/emails",
             headers={
@@ -39,89 +74,26 @@ def send_email(data):
                 "Content-Type": "application/json"
             },
             json={
-                "from": "ABCT System <onboarding@resend.dev>",
+                "from": "ABCT Booking <onboarding@resend.dev>",
                 "to": to_emails,
-                "subject": "📩 New Booking - ABCT",
-                "html": f"""
-                    <h2>New Booking Received</h2>
-                    <p><b>Name:</b> {data.get('name')}</p>
-                    <p><b>Email:</b> {data.get('email')}</p>
-                    <p><b>Phone:</b> {data.get('phone')}</p>
-                    <p><b>Booking Type:</b> {data.get('booking_type')}</p>
-                    <p><b>Date:</b> {data.get('date')}</p>
-                    <p><b>Time:</b> {data.get('time')}</p>
-                    <p><b>Guests:</b> {data.get('guests')}</p>
-                    <p><b>Address:</b> {data.get('address')}</p>
-                    <p><b>Order Details:</b> {data.get('order_details')}</p>
-                """
-            },
-            timeout=10  # 🔥 prevents hanging
+                "subject": subject,
+                "html": html_content
+            }
         )
 
         print("📡 Email API status:", response.status_code)
         print("📡 Response:", response.text)
 
-        return response.status_code in [200, 202]
-
-    except Exception as e:
-        print("❌ Email error:", str(e))
-        return False
-
-
-# =========================
-# 🌐 ROUTES
-# =========================
-@app.route("/")
-def home():
-    return "ABCT Backend Running ✅"
-
-
-@app.route("/webhook", methods=["POST"])
-def webhook():
-    try:
-        data = request.form.to_dict()
-        print("📥 Received booking:", data)
-
-        # =========================
-        # 🔥 SAFE EMAIL (NEVER BREAK SYSTEM)
-        # =========================
-        try:
-            email_sent = send_email(data)
-        except Exception as e:
-            print("⚠️ Email failed but continuing:", str(e))
-            email_sent = False
-
-        # =========================
-        # 💾 SAVE TO CSV (ALWAYS WORKS)
-        # =========================
-        file_exists = os.path.isfile("bookings.csv")
-
-        with open("bookings.csv", "a", newline="", encoding="utf-8") as f:
-            writer = csv.DictWriter(f, fieldnames=data.keys())
-
-            if not file_exists:
-                writer.writeheader()
-
-            writer.writerow(data)
-
         return jsonify({
             "status": "success",
-            "email_sent": email_sent,
-            "message": "Booking saved successfully"
+            "message": "Booking received",
+            "email_status": response.status_code
         })
 
     except Exception as e:
-        print("❌ Webhook error:", str(e))
-
-        return jsonify({
-            "status": "error",
-            "message": str(e)
-        }), 500
+        print("🔥 ERROR:", str(e))
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 
-# =========================
-# 🚀 RUN (RENDER / LOCAL)
-# =========================
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=10000)
