@@ -2,36 +2,51 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
 import requests
+import csv
 
 app = Flask(__name__)
 CORS(app)
 
-# ===== ENV VARIABLES =====
-EMAIL_USER = os.getenv("EMAIL_USER")  # actual email
+# =========================
+# ✅ ENV VARIABLES
+# =========================
+EMAIL_USER = os.getenv("EMAIL_USER")
+DEV_EMAIL = os.getenv("DEV_EMAIL")
+STAFF_EMAIL = os.getenv("STAFF_EMAIL")
 RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 
-# ===== EMAIL VIA RESEND API =====
+# =========================
+# 📩 EMAIL FUNCTION (SAFE VERSION)
+# =========================
 def send_email(data):
     try:
+        if not RESEND_API_KEY:
+            print("❌ Missing RESEND_API_KEY")
+            return False
+
+        to_emails = [EMAIL_USER, DEV_EMAIL, STAFF_EMAIL]
+        to_emails = [email for email in to_emails if email]
+
+        if not to_emails:
+            print("❌ No recipient emails configured")
+            return False
+
         response = requests.post(
             "https://api.resend.com/emails",
             headers={
-                "Authorization": f"Bearer {os.environ.get('RESEND_API_KEY')}",
+                "Authorization": f"Bearer {RESEND_API_KEY}",
                 "Content-Type": "application/json"
             },
             json={
                 "from": "ABCT System <onboarding@resend.dev>",
-                "to": [
-                    os.environ.get("charlie0315coronado@gmail.com"),      # Owner
-                    os.environ.get("coronadonoell@gmail.com"),       # Developer
-                    os.environ.get("analyn23zamora@gmail.com")      # Inbound/Outbound Staff
-                ],
+                "to": to_emails,
                 "subject": "📩 New Booking - ABCT",
                 "html": f"""
-                    <h2>New Booking</h2>
+                    <h2>New Booking Received</h2>
                     <p><b>Name:</b> {data.get('name')}</p>
                     <p><b>Email:</b> {data.get('email')}</p>
                     <p><b>Phone:</b> {data.get('phone')}</p>
+                    <p><b>Booking Type:</b> {data.get('booking_type')}</p>
                     <p><b>Date:</b> {data.get('date')}</p>
                     <p><b>Time:</b> {data.get('time')}</p>
                     <p><b>Guests:</b> {data.get('guests')}</p>
@@ -40,13 +55,24 @@ def send_email(data):
                 """
             }
         )
-        print("✅ Email sent to 3 recipients:", response.status_code)
+
+        print("📡 Email API status:", response.status_code)
+        print("📡 Response:", response.text)
+
+        return response.status_code == 200 or response.status_code == 202
+
     except Exception as e:
         print("❌ Email error:", str(e))
-# ===== ROUTES =====
+        return False
+
+
+# =========================
+# 🌐 ROUTES
+# =========================
 @app.route("/")
 def home():
     return "ABCT Backend Running ✅"
+
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
@@ -54,10 +80,10 @@ def webhook():
         data = request.form.to_dict()
         print("📥 Received booking:", data)
 
-        send_email(data)
+        # 👉 SEND EMAIL (SAFE)
+        email_sent = send_email(data)
 
-        # save to CSV as backup
-        import csv
+        # 👉 SAVE TO CSV (ALWAYS SAVE kahit fail email)
         file_exists = os.path.isfile("bookings.csv")
         with open("bookings.csv", "a", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=data.keys())
@@ -65,13 +91,23 @@ def webhook():
                 writer.writeheader()
             writer.writerow(data)
 
-        return jsonify({"status": "success", "message": "Booking received"})
+        return jsonify({
+            "status": "success",
+            "email_sent": email_sent,
+            "message": "Booking saved"
+        })
 
     except Exception as e:
         print("❌ Webhook error:", str(e))
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
 
-# ===== RUN LOCAL =====
+
+# =========================
+# 🚀 RUN LOCAL / RENDER
+# =========================
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
