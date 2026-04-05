@@ -1,3 +1,14 @@
+from flask import Flask, request, jsonify
+import csv
+from datetime import datetime
+import requests
+import os
+
+app = Flask(__name__)
+
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
+
+
 @app.route("/webhook", methods=["POST"])
 def webhook():
     try:
@@ -9,29 +20,36 @@ def webhook():
         name = data.get("name")
         email = data.get("email")
         phone = data.get("phone")
-        time_ = data.get("time")
+        date = data.get("date")
 
-        # TYPE (IMPORTANT)
+        # 🔥 TIME FIX (24 → 12 FORMAT)
+        time_raw = data.get("time")
+        if time_raw:
+            try:
+                time_ = datetime.strptime(time_raw, "%H:%M").strftime("%I:%M %p")
+            except:
+                time_ = time_raw
+        else:
+            time_ = None
+
+        # TYPE
         booking_type = data.get("booking_type")
 
-        # DINE-IN
-        date = data.get("date")
+        # OPTIONAL
         guests = data.get("guests")
-
-        # DELIVERY
         address = data.get("address")
         order_details = data.get("order_details")
         payment_method = data.get("payment_method")
 
-        # 📝 SAVE CSV (keep everything for records)
+        # 📝 SAVE CSV
         with open("bookings.csv", "a", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow([
                 datetime.now(),
-                booking_type,
                 name,
                 email,
                 phone,
+                booking_type,
                 guests,
                 address,
                 order_details,
@@ -44,7 +62,7 @@ def webhook():
         if not RESEND_API_KEY:
             return jsonify({"status": "error", "message": "Missing API key"}), 500
 
-        # 📧 EMAIL LIST
+        # 📧 EMAIL TARGETS
         OWNER_EMAIL = os.environ.get("OWNER_EMAIL")
         STAFF_EMAIL = os.environ.get("STAFF_EMAIL")
 
@@ -56,67 +74,55 @@ def webhook():
         if STAFF_EMAIL:
             to_emails.append(STAFF_EMAIL)
 
-        # 📧 EMAIL CONTENT (FIXED)
+        # 🚚 DELIVERY EMAIL
         if booking_type == "delivery":
-
             subject = "🚚 New Delivery Order"
-
             html_content = f"""
-            <h2>🚚 Delivery Order</h2>
-
+            <h2>New Delivery Order</h2>
             <p><strong>Name:</strong> {name}</p>
-            <p><strong>Email:</strong> {email}</p>
             <p><strong>Phone:</strong> {phone}</p>
-
             <p><strong>Address:</strong> {address}</p>
-            <p><strong>Order:</strong> {order_details or 'N/A'}</p>
+            <p><strong>Order:</strong> {order_details}</p>
             <p><strong>Payment:</strong> {payment_method}</p>
-
-            <p><strong>Time:</strong> {time_ or 'ASAP'}</p>
+            <p><strong>Date:</strong> {date}</p>
+            <p><strong>Time:</strong> {time_}</p>
             """
 
+        # 🍽️ DINE-IN / EVENT
         else:
-
             subject = "📅 New Booking Received"
-
             html_content = f"""
-            <h2>🍽️ Dine-in Reservation</h2>
-
+            <h2>New Booking</h2>
             <p><strong>Name:</strong> {name}</p>
             <p><strong>Email:</strong> {email}</p>
             <p><strong>Phone:</strong> {phone}</p>
-
-            <p><strong>Date:</strong> {date or 'N/A'}</p>
-            <p><strong>Time:</strong> {time_ or 'N/A'}</p>
-            <p><strong>Guests:</strong> {guests or 'N/A'}</p>
+            <p><strong>Type:</strong> {booking_type}</p>
+            <p><strong>Date:</strong> {date}</p>
+            <p><strong>Time:</strong> {time_}</p>
+            {"<p><strong>Guests:</strong> " + str(guests) + "</p>" if guests else ""}
             """
 
-        # 📡 SEND EMAIL (FAIL SAFE)
-        try:
-            response = requests.post(
-                "https://api.resend.com/emails",
-                headers={
-                    "Authorization": f"Bearer {RESEND_API_KEY}",
-                    "Content-Type": "application/json"
-                },
-                json={
-                    "from": "ABCT Booking <onboarding@resend.dev>",
-                    "to": to_emails,
-                    "subject": subject,
-                    "html": html_content
-                }
-            )
+        # 📡 SEND EMAIL
+        response = requests.post(
+            "https://api.resend.com/emails",
+            headers={
+                "Authorization": f"Bearer {RESEND_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "from": "ABCT Booking <onboarding@resend.dev>",
+                "to": to_emails,
+                "subject": subject,
+                "html": html_content
+            }
+        )
 
-            print("📡 Email status:", response.status_code)
+        print("📡 Sent to:", to_emails)
 
-        except Exception as email_error:
-            print("❌ Email failed:", email_error)
-
-        # ALWAYS SUCCESS (IMPORTANT)
         return jsonify({
-            "status": "success"
+            "status": "success",
+            "email_status": response.status_code
         })
 
     except Exception as e:
-        print("🔥 SERVER ERROR:", e)
         return jsonify({"status": "error", "message": str(e)}), 500
