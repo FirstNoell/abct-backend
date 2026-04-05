@@ -1,72 +1,92 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import os
-import requests
-import csv
-from datetime import datetime
-
-app = Flask(__name__)
-CORS(app)
-
-# 🔐 ENV VARIABLES
-RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
-
-@app.route("/")
-def home():
-    return "ABCT Backend Running 🚀"
-
 @app.route("/webhook", methods=["POST"])
 def webhook():
     try:
         data = request.form
 
-        # 📥 Extract form data
+        print("📥 Received data:", data)
+
+        form_type = data.get("form-name")
+
+        # COMMON
         name = data.get("name")
         email = data.get("email")
         phone = data.get("phone")
-        booking_type = data.get("booking_type")
         date = data.get("date")
         time_ = data.get("time")
+
+        # BOOKING
+        booking_type = data.get("booking_type")
         guests = data.get("guests")
 
-        print("📥 Received booking:", data)
+        # DELIVERY
+        address = data.get("address")
+        order_details = data.get("order_details")
+        payment_method = data.get("payment_method")
 
-        # 📝 Save to CSV
+        # 📝 SAVE CSV
         with open("bookings.csv", "a", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow([
                 datetime.now(),
+                form_type,
                 name,
                 email,
                 phone,
                 booking_type,
+                guests,
+                address,
+                order_details,
+                payment_method,
                 date,
-                time_,
-                guests
+                time_
             ])
 
-        # ❌ If no API key
+        # ❌ API KEY CHECK
         if not RESEND_API_KEY:
-            print("❌ Missing RESEND_API_KEY")
             return jsonify({"status": "error", "message": "Missing API key"}), 500
 
-        # 🔥 DEMO MODE → FORCE EMAIL TO YOU
+        # 🔥 GET EMAILS FROM ENV
+        OWNER_EMAIL = os.environ.get("OWNER_EMAIL")
+        STAFF_EMAIL = os.environ.get("STAFF_EMAIL")
+
+        # 👉 DEFAULT (ikaw)
         to_emails = ["coronadonoell@gmail.com"]
 
-        # 📧 Email content
-        subject = "📅 New Booking Received"
-        html_content = f"""
-        <h2>New Booking</h2>
-        <p><strong>Name:</strong> {name}</p>
-        <p><strong>Email:</strong> {email}</p>
-        <p><strong>Phone:</strong> {phone}</p>
-        <p><strong>Type:</strong> {booking_type}</p>
-        <p><strong>Date:</strong> {date}</p>
-        <p><strong>Time:</strong> {time_}</p>
-        <p><strong>Guests:</strong> {guests}</p>
-        """
+        # 👉 ADD OWNER
+        if OWNER_EMAIL:
+            to_emails.append(OWNER_EMAIL)
 
-        # 📡 Send email via Resend
+        # 👉 ADD STAFF (optional)
+        if STAFF_EMAIL:
+            to_emails.append(STAFF_EMAIL)
+
+        # 📧 EMAIL CONTENT
+        if form_type == "delivery":
+            subject = "🚚 New Delivery Order"
+            html_content = f"""
+            <h2>New Delivery Order</h2>
+            <p><strong>Name:</strong> {name}</p>
+            <p><strong>Phone:</strong> {phone}</p>
+            <p><strong>Address:</strong> {address}</p>
+            <p><strong>Order:</strong> {order_details}</p>
+            <p><strong>Payment:</strong> {payment_method}</p>
+            <p><strong>Date:</strong> {date}</p>
+            <p><strong>Time:</strong> {time_}</p>
+            """
+        else:
+            subject = "📅 New Booking Received"
+            html_content = f"""
+            <h2>New Booking</h2>
+            <p><strong>Name:</strong> {name}</p>
+            <p><strong>Email:</strong> {email}</p>
+            <p><strong>Phone:</strong> {phone}</p>
+            <p><strong>Type:</strong> {booking_type}</p>
+            <p><strong>Date:</strong> {date}</p>
+            <p><strong>Time:</strong> {time_}</p>
+            <p><strong>Guests:</strong> {guests}</p>
+            """
+
+        # 📡 SEND EMAIL
         response = requests.post(
             "https://api.resend.com/emails",
             headers={
@@ -81,19 +101,12 @@ def webhook():
             }
         )
 
-        print("📡 Email API status:", response.status_code)
-        print("📡 Response:", response.text)
+        print("📡 Sent to:", to_emails)
 
         return jsonify({
             "status": "success",
-            "message": "Booking received",
             "email_status": response.status_code
         })
 
     except Exception as e:
-        print("🔥 ERROR:", str(e))
         return jsonify({"status": "error", "message": str(e)}), 500
-
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
