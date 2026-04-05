@@ -105,6 +105,7 @@ def webhook():
             """
 
         # 📡 SEND EMAIL
+        # 📡 SEND EMAIL
         response = requests.post(
             "https://api.resend.com/emails",
             headers={
@@ -112,12 +113,16 @@ def webhook():
                 "Content-Type": "application/json"
             },
             json={
-                "from": "ABCT Booking <onboarding@resend.dev>",
-                "to": to_emails,
+                "from": "onboarding@resend.dev",  # ✅ FIXED
+                "to": ["coronadonoell@gmail.com"],  # test muna
                 "subject": subject,
                 "html": html_content
             }
         )
+
+        # 🔍 DEBUG
+        print("📡 Status:", response.status_code)
+        print("📡 Body:", response.text)
 
         print("📡 Sent to:", to_emails)
 
