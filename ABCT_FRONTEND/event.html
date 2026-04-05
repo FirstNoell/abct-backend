@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABCT | Event Reservation</title>
+
+    <link rel="icon" href="logo.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+    <nav>
+
+        <!-- LOGO -->
+        <div class="logo">
+            <img src="ABC_NOBACK_2026-04-03_112714-removebg-preview.png" width="50">
+        </div>
+
+        <!-- CENTER -->
+        <div class="nav-center">
+            <h2>ABCT Japanese Restaurant</h2>
+            <p>Host your special events with us</p>
+            <a href="#booking">Book Event</a>
+        </div>
+
+        <!-- NAV -->
+        <ul class="nav-links">
+            <li><a href="dinein.html">Dine-in</a></li>
+            <li><a href="delivery.html">Delivery</a></li>
+            <li><a href="event.html">Event</a></li>
+        </ul>
+
+    </nav>
+</header>
+
+<!-- 🔥 EVENT FORM -->
+<section id="booking">
+    <h2>🎉 Event Reservation</h2>
+    <p>Plan your special event with us</p>
+
+    <form id="bookingForm">
+
+        <!-- 🔥 HIDDEN -->
+        <input type="hidden" name="form-name" value="booking">
+        <input type="hidden" name="booking_type" value="event">
+
+        <!-- 👤 BASIC INFO -->
+        <input type="text" name="name" placeholder="Full Name" required>
+        <input type="email" name="email" placeholder="Email Address" required>
+        <input type="tel" name="phone" placeholder="Phone Number" required>
+
+        <!-- 🎉 EVENT TYPE -->
+        <select name="event_type" required>
+            <option value="">Select Event Type</option>
+            <option value="corporate">Corporate Event</option>
+            <option value="wedding">Wedding</option>
+            <option value="birthday">Birthday</option>
+            <option value="anniversary">Anniversary</option>
+            <option value="other">Other</option>
+        </select>
+
+        <!-- 📅 DATE & TIME -->
+        <input type="date" name="date" required>
+        <input type="time" name="time" required>
+
+        <!-- 👥 PAX -->
+        <input type="number" name="event_guests" placeholder="Number of Pax" required>
+
+        <!-- 📝 DETAILS -->
+        <textarea name="order_details" placeholder="Additional requests (setup, theme, food preferences, etc.)"></textarea>
+
+        <!-- 🚀 SUBMIT -->
+        <button type="submit">Book Event</button>
+
+    </form>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+    <h2>Contact</h2>
+    <p>Email: charlie0315coronado@gmail.com</p>
+</section>
+
+<footer>
+    <p>© 2026 ABCT Restaurant</p>
+</footer>
+
+<script src="script.js"></script>
+
+</body>
+</html>

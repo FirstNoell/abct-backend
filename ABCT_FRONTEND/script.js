@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     console.log("🔥 SYSTEM READY");
 
-    // smooth scroll
+    // smooth scroll (safe kahit wala)
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener("click", function (e) {
             e.preventDefault();
@@ -17,45 +17,45 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // form handler
-    handleForm("bookingForm", "submitBtn");
-    handleForm("deliveryForm", "deliveryBtn");
+    // ✅ UNIVERSAL FORM HANDLER (works for dinein, delivery, event)
+    const form = document.querySelector("form");
 
-    function handleForm(formId, btnId) {
+    if (!form) {
+        console.warn("⚠️ No form found on this page");
+        return;
+    }
 
-        const form = document.getElementById(formId);
-        const btn = document.getElementById(btnId);
+    form.addEventListener("submit", async function (e) {
+        e.preventDefault();
 
-        if (!form) return;
+        const btn = form.querySelector("button[type='submit']");
+        if (btn) btn.innerText = "Sending...";
 
-        form.addEventListener("submit", async function (e) {
-            e.preventDefault();
+        const data = new FormData(form);
 
-            const data = new FormData(form);
+        try {
+            const res = await fetch("https://abct-backend.onrender.com/webhook", {
+                method: "POST",
+                body: data
+            });
 
-            if (btn) btn.innerText = "Sending...";
+            const result = await res.json();
 
-            try {
-                const res = await fetch("https://abct-backend.onrender.com/webhook", {
-                    method: "POST",
-                    body: data
-                });
+            console.log("📡 Response:", result);
 
-                const result = await res.json();
-
-                if (result.status === "success") {
-                    alert("Success!");
-                    form.reset();
-                } else {
-                    alert("Failed");
-                }
-
-            } catch (err) {
-                alert("Error connecting server");
+            if (result.status === "success") {
+                alert("✅ Success!");
+                form.reset();
+            } else {
+                alert("❌ Failed");
             }
 
-            if (btn) btn.innerText = "Submit";
-        });
-    }
+        } catch (err) {
+            console.error("🔥 Error:", err);
+            alert("❌ Error connecting server");
+        }
+
+        if (btn) btn.innerText = "Submit";
+    });
 
 });

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABCT | Dine-in</title>
+
+    <link rel="icon" href="logo.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- 🔥 NAVBAR -->
+<header>
+    <nav>
+
+        <!-- LEFT: LOGO -->
+        <div class="logo">
+            <img src="ABC_NOBACK_2026-04-03_112714-removebg-preview.png" alt="ABCT Logo" width="50">
+        </div>
+
+        <!-- CENTER: HERO CONTENT -->
+        <div class="nav-center">
+            <h2>ABCT Japanese Restaurant</h2>
+            <p>Experience authentic Japanese dining</p>
+            <a href="#booking">Reserve Now</a>
+        </div>
+
+        <!-- RIGHT: NAV LINKS -->
+        <ul class="nav-links">
+            <li><a href="dinein.html">Dine-in</a></li>
+            <li><a href="delivery.html">Delivery</a></li>
+            <li><a href="event.html">Event</a></li>
+        </ul>
+
+    </nav>
+</header>
+
+<!-- 🔥 DINE-IN FORM -->
+<section id="booking">
+    <h2>Delivery Order</h2>
+    <form id="bookingForm">
+
+        <input type="text" name="name" placeholder="Full Name" required>
+
+        <input type="email" name="email" placeholder="Email Address" required>
+
+        <input type="tel" name="phone" placeholder="Phone Number" required>
+
+        <input type="text" name="address" placeholder="Delivery Address" required>
+
+        <textarea name="order_details" placeholder="Enter your order"></textarea>
+
+        <select name="payment_method" required>
+            <option value="">Payment Method</option>
+            <option value="cash">Cash on Delivery</option>
+            <option value="gcash">GCash</option>
+            <option value="card">Card</option>
+        </select>
+
+        <input type="time" name="time">
+
+        <!-- 🔥 IMPORTANT -->
+        <input type="hidden" name="booking_type" value="delivery">
+
+        <button type="submit">Place Order</button>
+
+    </form>
+</section>
+
+<!-- 🔥 CONTACT -->
+<section id="contact">
+    <h2>Contact</h2>
+    <p>Email: charlie0315coronado@gmail.com</p>
+    <p>Phone: +63 912 345 6789</p>
+</section>
+
+<footer>
+    <p>© 2026 ABCT Restaurant</p>
+</footer>
+
+<!-- JS -->
+<script src="script.js"></script>
+
+</body>
+</html>

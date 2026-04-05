@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABCT | Dine-in</title>
+
+    <link rel="icon" href="logo.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- 🔥 NAVBAR -->
+<header>
+    <nav>
+
+        <!-- LEFT: LOGO -->
+        <div class="logo">
+            <img src="ABC_NOBACK_2026-04-03_112714-removebg-preview.png" alt="ABCT Logo" width="50">
+        </div>
+
+        <!-- CENTER: HERO CONTENT -->
+        <div class="nav-center">
+            <h2>ABCT Japanese Restaurant</h2>
+            <p>Experience authentic Japanese dining</p>
+            <a href="#booking">Reserve Now</a>
+        </div>
+
+        <!-- RIGHT: NAV LINKS -->
+        <ul class="nav-links">
+            <li><a href="dinein.html">Dine-in</a></li>
+            <li><a href="delivery.html">Delivery</a></li>
+            <li><a href="event.html">Event</a></li>
+        </ul>
+
+    </nav>
+</header>
+
+<!-- 🔥 DINE-IN FORM -->
+<section id="booking">
+    <h2>Dine-in Reservation</h2>
+
+    <form id="bookingForm">
+
+        <!-- 👤 CUSTOMER INFO -->
+        <input type="text" name="name" placeholder="Full Name" required>
+
+        <input type="email" name="email" placeholder="Email Address" required>
+
+        <input type="tel" name="phone" placeholder="Phone Number" required>
+
+        <!-- 📅 DATE & TIME -->
+        <input type="date" name="date" required>
+
+        <input type="time" name="time" required>
+
+        <!-- 👥 GUESTS -->
+        <input type="number" name="guests" placeholder="Number of Pax" min="1" max="20" required>
+
+        <!-- 🔥 IMPORTANT -->
+        <input type="hidden" name="booking_type" value="dine_in">
+
+        <!-- 🚀 SUBMIT -->
+        <button type="submit">Reserve Table</button>
+
+    </form>
+</section>
+
+<!-- 🔥 CONTACT -->
+<section id="contact">
+    <h2>Contact</h2>
+    <p>Email: charlie0315coronado@gmail.com</p>
+    <p>Phone: +63 912 345 6789</p>
+</section>
+
+<footer>
+    <p>© 2026 ABCT Restaurant</p>
+</footer>
+
+<!-- JS -->
+<script src="script.js"></script>
+
+</body>
+</html>
