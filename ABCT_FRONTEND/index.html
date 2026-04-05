@@ -1,7 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-<!DOCTYPE html>
-<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,11 +23,11 @@
         <ul class="nav-links" id="navLinks">
             <li><a href="#home">Home</a></li>
             <li><a href="#booking">Booking</a></li>
+            <li><a href="#delivery">Delivery</a></li>
             <li><a href="#contact">Contact</a></li>
         </ul>
     </nav>
 </header>
-
 
 <!-- HOME -->
 <section id="home">
@@ -49,6 +47,13 @@
         <input type="text" name="name" placeholder="Full Name" required>
         <input type="email" name="email" placeholder="Email" required>
         <input type="tel" name="phone" placeholder="Phone" required>
+
+        <!-- ✅ FIXED DROPDOWN -->
+        <select name="booking_type" required>
+            <option value="">Select Reservation Type</option>
+            <option value="dine_in">Dine-In</option>
+            <option value="event">Event Reservation</option>
+        </select>
 
         <input type="date" name="date" required>
         <input type="time" name="time" required>
@@ -75,8 +80,9 @@
         <input type="date" name="date" required>
         <input type="time" name="time" required>
 
+        <!-- ✅ PAYMENT DROPDOWN FIX -->
         <select name="payment_method" required>
-            <option value="">Payment</option>
+            <option value="">Select Payment</option>
             <option value="cash">Cash</option>
             <option value="gcash">GCash</option>
         </select>
