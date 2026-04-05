@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -28,42 +30,58 @@
     </nav>
 </header>
 
+
 <!-- HOME -->
 <section id="home">
     <div class="overlay">
-        <h1>ABCT Japanese Restaurant</h1>
+        <h1>🍣 ABCT Japanese Restaurant</h1>
         <p>Experience authentic Japanese dining</p>
-        <a href="#booking" class="btn">Reserve Now</a>
     </div>
 </section>
 
 <!-- BOOKING -->
 <section id="booking">
-    <h2>Book a Table</h2>
+    <h2>📅 Reservation</h2>
 
-    <!-- ✅ UPDATED FORM (CONNECTED SA BACKEND) -->
     <form id="bookingForm">
+        <input type="hidden" name="form-name" value="booking">
 
         <input type="text" name="name" placeholder="Full Name" required>
-
-        <input type="email" name="email" placeholder="Email Address" required>
-
-        <input type="tel" name="phone" placeholder="Phone Number" required>
-
-        <select name="booking_type" required>
-            <option value="">Select Booking Type</option>
-            <option value="dine_in">Dine-In Reservation</option>
-            <option value="delivery">Delivery Order</option>
-            <option value="event">Event Reservation</option>
-        </select>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="tel" name="phone" placeholder="Phone" required>
 
         <input type="date" name="date" required>
         <input type="time" name="time" required>
 
-        <input type="number" name="guests" placeholder="Number of Guests" min="1" max="300" required>
+        <input type="number" name="guests" placeholder="Guests" required>
 
         <button type="submit" id="submitBtn">Book Now</button>
+    </form>
+</section>
 
+<!-- DELIVERY -->
+<section id="delivery">
+    <h2>🚚 Delivery Order</h2>
+
+    <form id="deliveryForm">
+        <input type="hidden" name="form-name" value="delivery">
+
+        <input type="text" name="name" placeholder="Full Name" required>
+        <input type="tel" name="phone" placeholder="Phone" required>
+
+        <textarea name="address" placeholder="Address" required></textarea>
+        <textarea name="order_details" placeholder="Order Details" required></textarea>
+
+        <input type="date" name="date" required>
+        <input type="time" name="time" required>
+
+        <select name="payment_method" required>
+            <option value="">Payment</option>
+            <option value="cash">Cash</option>
+            <option value="gcash">GCash</option>
+        </select>
+
+        <button type="submit" id="deliveryBtn">Place Order</button>
     </form>
 </section>
 
@@ -71,20 +89,8 @@
 <section id="contact">
     <h2>Contact</h2>
     <p>Email: charlie0315coronado@gmail.com</p>
-    <p>Phone: +63 912 345 6789</p>
 </section>
 
-<footer>
-    <p>© 2026 ABCT Restaurant</p>
-</footer>
-
-<script>
-function toggleMenu() {
-    document.getElementById("navLinks").classList.toggle("active");
-}
-</script>
-
-<!-- ✅ IMPORTANT: CONNECT JS -->
 <script src="script.js"></script>
 
 </body>

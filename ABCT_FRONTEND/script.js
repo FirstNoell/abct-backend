@@ -1,54 +1,61 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-    console.log("🔥 JS LOADED");
+    console.log("🔥 SYSTEM READY");
 
-    const form = document.getElementById("bookingForm");
-    const btn = document.getElementById("submitBtn");
+    // smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
 
-    if (!form) {
-        console.error("❌ bookingForm NOT FOUND");
-        return;
-    }
+            const target = document.querySelector(this.getAttribute("href"));
 
-    form.addEventListener("submit", async function(e) {
-        e.preventDefault();
+            if (target) {
+                target.scrollIntoView({
+                    behavior: "smooth"
+                });
+            }
+        });
+    });
 
-        console.log("🚀 Form submitted");
+    // form handler
+    handleForm("bookingForm", "submitBtn");
+    handleForm("deliveryForm", "deliveryBtn");
 
-        const formData = new FormData(form);
+    function handleForm(formId, btnId) {
 
-        try {
-            // 🔥 UX improvement (loading state)
-            btn.disabled = true;
-            btn.innerText = "Processing...";
+        const form = document.getElementById(formId);
+        const btn = document.getElementById(btnId);
 
-            console.log("👉 Sending request...");
+        if (!form) return;
 
-            const response = await fetch("https://abct-backend.onrender.com/webhook", {
-                method: "POST",
-                body: formData
-            });
+        form.addEventListener("submit", async function (e) {
+            e.preventDefault();
 
-            console.log("📡 Response status:", response.status);
+            const data = new FormData(form);
 
-            const result = await response.json();
-            console.log("📦 Result:", result);
+            if (btn) btn.innerText = "Sending...";
 
-            if (result.status === "success") {
-                alert("✅ Booking submitted successfully!");
-                form.reset();
-            } else {
-                alert("❌ Failed: " + JSON.stringify(result));
+            try {
+                const res = await fetch("https://abct-backend.onrender.com/webhook", {
+                    method: "POST",
+                    body: data
+                });
+
+                const result = await res.json();
+
+                if (result.status === "success") {
+                    alert("Success!");
+                    form.reset();
+                } else {
+                    alert("Failed");
+                }
+
+            } catch (err) {
+                alert("Error connecting server");
             }
 
-        } catch (error) {
-            console.error("❌ FETCH ERROR:", error);
-            alert("❌ Error connecting to server");
-        } finally {
-            // 🔥 Reset button state
-            btn.disabled = false;
-            btn.innerText = "Book Now";
-        }
-    });
+            if (btn) btn.innerText = "Submit";
+        });
+    }
 
 });
