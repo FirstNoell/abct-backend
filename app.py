@@ -1,10 +1,12 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import csv
 from datetime import datetime
 import requests
 import os
 
 app = Flask(__name__)
+CORS(app)
 
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
 
